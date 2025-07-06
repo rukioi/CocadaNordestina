@@ -401,7 +401,7 @@ const DeliveryManager: React.FC = () => {
                 </Button>
               </div>
             </div>
-          </DialogContent>
+          </div>
         </DialogContent>
       </Dialog>
 
