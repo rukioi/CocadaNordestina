@@ -1,0 +1,219 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+@layer base {
+  :root {
+    /* Tema Cocada Nordestina */
+    --background: 0 0% 100%;
+    --foreground: 25 25% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 25 25% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 25% 15%;
+    
+    /* Cores principais - tons de coco e nordeste */
+    --primary: 25 65% 35%; /* Marrom coco escuro */
+    --primary-foreground: 42 15% 97%; /* Branco coco */
+    --secondary: 35 25% 90%; /* Bege claro */
+    --secondary-foreground: 25 25% 15%;
+    --muted: 35 15% 95%;
+    --muted-foreground: 25 15% 45%;
+    --accent: 35 45% 70%; /* Dourado */
+    --accent-foreground: 25 25% 15%;
+    
+    /* Cores especiais */
+    --coconut-50: 42 15% 97%;
+    --coconut-100: 40 12% 92%;
+    --coconut-200: 38 10% 85%;
+    --tropical-500: 142 70% 45%; /* Verde tropical */
+    --warning: 45 90% 55%; /* Amarelo */
+    --warning-foreground: 25 25% 15%;
+    
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 35 15% 89%;
+    --input: 35 15% 89%;
+    --ring: 25 65% 35%;
+    --radius: 0.75rem;
+    
+    /* Charts */
+    --chart-1: 25 65% 45%; /* Marrom coco */
+    --chart-2: 35 45% 70%; /* Dourado */
+    --chart-3: 142 70% 45%; /* Verde tropical */
+    --chart-4: 45 90% 55%; /* Amarelo */
+    --chart-5: 15 80% 60%; /* Laranja */
+  }
+
+  .dark {
+    --background: 25 25% 8%;
+    --foreground: 42 15% 97%;
+    --card: 25 25% 8%;
+    --card-foreground: 42 15% 97%;
+    --popover: 25 25% 8%;
+    --popover-foreground: 42 15% 97%;
+    --primary: 35 45% 70%;
+    --primary-foreground: 25 25% 8%;
+    --secondary: 25 15% 15%;
+    --secondary-foreground: 42 15% 97%;
+    --muted: 25 15% 15%;
+    --muted-foreground: 35 15% 65%;
+    --accent: 25 15% 15%;
+    --accent-foreground: 42 15% 97%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 42 15% 97%;
+    --border: 25 15% 15%;
+    --input: 25 15% 15%;
+    --ring: 35 45% 70%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Animações personalizadas */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Estilos para mobile */
+@media (max-width: 768px) {
+  .mobile-optimized {
+    touch-action: manipulation;
+  }
+  
+  /* Botões maiores para touch */
+  .mobile-touch {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Gradientes personalizados */
+.gradient-coco {
+  background: linear-gradient(135deg, hsl(var(--coconut-50)) 0%, hsl(var(--secondary)) 100%);
+}
+
+.gradient-tropical {
+  background: linear-gradient(135deg, hsl(var(--tropical-500) / 0.1) 0%, hsl(var(--accent) / 0.1) 100%);
+}
+
+/* Estados de loading */
+.loading-shimmer {
+  background: linear-gradient(90deg, 
+    hsl(var(--muted)) 25%, 
+    hsl(var(--muted-foreground) / 0.1) 50%, 
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Melhorias de acessibilidade */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus states melhorados */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
+}
+
+/* Utilitários personalizados */
+.text-balance {
+  text-wrap: balance;
+}
+
+.container-mobile {
+  @apply px-4 mx-auto max-w-7xl;
+}
+
+@media (min-width: 640px) {
+  .container-mobile {
+    @apply px-6;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-mobile {
+    @apply px-8;
+  }
+}
