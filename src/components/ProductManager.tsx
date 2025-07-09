@@ -28,6 +28,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 
+interface ProductFormData {
+  name: string;
+  price: string;
+  stock: string;
+  category: string;
+  description: string;
+  image: string;
+}
+
 const ProductManager: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -41,7 +50,7 @@ const ProductManager: React.FC = () => {
   const [stockValue, setStockValue] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProductFormData>({
     name: '',
     price: '',
     stock: '',
@@ -141,7 +150,7 @@ const ProductManager: React.FC = () => {
       return;
     }
 
-    const newProduct = SalesSystem.createProduct({
+    SalesSystem.createProduct({
       name: formData.name,
       price: parseFloat(formData.price),
       stock: parseInt(formData.stock) || 0,

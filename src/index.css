@@ -152,6 +152,90 @@ body {
     min-height: 44px;
     min-width: 44px;
   }
+  
+  /* Ajustes para telas pequenas */
+  .container-mobile {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Cards responsivos */
+  .responsive-card {
+    margin-bottom: 1rem;
+  }
+  
+  /* Tabelas responsivas */
+  .responsive-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Formulários mobile */
+  .mobile-form {
+    padding: 1rem;
+  }
+  
+  .mobile-form .grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  /* Navegação mobile */
+  .mobile-nav {
+    padding: 0.5rem;
+  }
+  
+  /* Modais mobile */
+  .mobile-modal {
+    margin: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+}
+
+/* Ajustes específicos para telas muito pequenas */
+@media (max-width: 480px) {
+  /* Reduzir padding geral */
+  .space-y-6 > * + * {
+    margin-top: 1.5rem;
+  }
+  
+  .space-y-4 > * + * {
+    margin-top: 1rem;
+  }
+  
+  /* Ajustar grid para mobile */
+  .grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3 {
+    grid-template-columns: 1fr;
+  }
+  
+  .grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3 {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Botões full width em mobile */
+  .mobile-button-full {
+    width: 100%;
+  }
+  
+  /* Texto menor em mobile */
+  .text-3xl {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+  
+  .text-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+}
+
+/* Ajustes para landscape em mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .landscape-adjust {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
 }
 
 /* Gradientes personalizados */
@@ -215,5 +299,37 @@ body {
 @media (min-width: 1024px) {
   .container-mobile {
     @apply px-8;
+  }
+}
+
+/* Classes utilitárias para responsividade */
+.responsive-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .responsive-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .responsive-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.responsive-flex {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .responsive-flex {
+    flex-direction: row;
+    align-items: center;
   }
 }

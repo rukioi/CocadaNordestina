@@ -12,8 +12,16 @@ import { SalesSystem } from '@/lib/salesSystem';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useNavigate } from 'react-router-dom';
+
+interface QuickAction {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  description: string;
+  action: () => void;
+  color: string;
+}
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -56,7 +64,7 @@ const Dashboard: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
-  const quickActions = [
+  const quickActions: QuickAction[] = [
     {
       icon: Plus,
       label: 'Nova Venda',
@@ -155,7 +163,7 @@ const Dashboard: React.FC = () => {
               const Icon = action.icon;
               return (
                 <Button
-                  key={index}
+                  key={`action-${index}`}
                   variant="outline"
                   className="h-auto p-4 flex flex-col items-center gap-3 hover:shadow-md transition-shadow"
                   onClick={action.action}
@@ -200,7 +208,7 @@ const Dashboard: React.FC = () => {
                     tickFormatter={(value) => `R$ ${value}`}
                     fontSize={12}
                   />
-                  <Tooltip 
+                  <RechartsTooltip 
                     formatter={(value) => [formatCurrency(Number(value)), 'Vendas']}
                     labelFormatter={(label) => formatDate(label)}
                   />
@@ -238,7 +246,7 @@ const Dashboard: React.FC = () => {
                     width={100}
                     fontSize={12}
                   />
-                  <Tooltip 
+                  <RechartsTooltip 
                     formatter={(value) => [`${value} potes`, 'Vendidos']}
                   />
                   <Bar 

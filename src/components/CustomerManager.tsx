@@ -28,6 +28,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 
+interface CustomerFormData {
+  name: string;
+  phone: string;
+  address: {
+    street: string;
+    number: string;
+    neighborhood: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  };
+}
+
 const CustomerManager: React.FC = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
@@ -37,7 +50,7 @@ const CustomerManager: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CustomerFormData>({
     name: '',
     phone: '',
     address: {
@@ -106,7 +119,7 @@ const CustomerManager: React.FC = () => {
   const handleCreate = () => {
     if (!validateForm()) return;
 
-    const newCustomer = SalesSystem.createCustomer({
+    SalesSystem.createCustomer({
       name: formData.name,
       type: 'PF',
       document: '',

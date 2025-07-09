@@ -31,7 +31,7 @@ import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 
 // Interface para rota de entrega
-interface DeliveryRoute {
+interface DeliveryRouteLocal {
   id: string;
   name: string;
   date: string;
@@ -41,8 +41,22 @@ interface DeliveryRoute {
   estimatedTime: number;
 }
 
+interface RouteForm {
+  name: string;
+  date: string;
+  selectedSales: string[];
+}
+
+interface RouteMetrics {
+  totalValue: number;
+  totalItems: number;
+  estimatedTime: number;
+  stops: number;
+  regions: string[];
+}
+
 // Bairros de Aracaju organizados por região para otimização de rotas
-const ARACAJU_NEIGHBORHOODS = {
+const ARACAJU_NEIGHBORHOODS: Record<string, string[]> = {
   'Centro': ['Centro', 'São José', 'Getémio Vargas', 'Siqueira Campos'],
   'Zona Sul': ['Atalaia', 'Coroa do Meio', 'Farolândia', 'Grageru', 'Jardins', 'Luzia', 'Ponta Verde', 'São Conrado', 'Treze de Julho'],
   'Zona Norte': ['18 do Forte', 'América', 'Cirurgia', 'Cidade Nova', 'Industrial', 'Lamarão', 'Novo Paraíso', 'Palestina', 'Santos Dumont'],
@@ -51,17 +65,17 @@ const ARACAJU_NEIGHBORHOODS = {
 
 const DeliveryManager: React.FC = () => {
   const [sales] = useState<Sale[]>([]);
-  const [routes] = useState<DeliveryRoute[]>([]);
+  const [routes] = useState<DeliveryRouteLocal[]>([]);
   const [customers] = useState<Customer[]>([]);
   const [pendingSales] = useState<Sale[]>([]);
   const [isCreateRouteModalOpen, setIsCreateRouteModalOpen] = useState(false);
   const [isViewRouteModalOpen, setIsViewRouteModalOpen] = useState(false);
-  const [selectedRoute, setSelectedRoute] = useState<DeliveryRoute | null>(null);
+  const [selectedRoute, setSelectedRoute] = useState<DeliveryRouteLocal | null>(null);
   
-  const [routeForm, setRouteForm] = useState({
+  const [routeForm, setRouteForm] = useState<RouteForm>({
     name: '',
     date: '',
-    selectedSales: [] as string[]
+    selectedSales: []
   });
 
   useEffect(() => {
@@ -120,7 +134,7 @@ const DeliveryManager: React.FC = () => {
     return optimizedSales;
   };
 
-  const calculateRouteMetrics = (salesIds: string[]) => {
+  const calculateRouteMetrics = (salesIds: string[]): RouteMetrics => {
     const routeSales = sales.filter(sale => salesIds.includes(sale.id));
     const totalValue = routeSales.reduce((sum, sale) => sum + sale.total, 0);
     const totalItems = routeSales.reduce((sum, sale) => 
@@ -165,7 +179,7 @@ const DeliveryManager: React.FC = () => {
     });
   };
 
-  const handleCompleteRoute = (route: DeliveryRoute) => {
+  const handleCompleteRoute = (route: DeliveryRouteLocal) => {
     if (confirm(`Confirmar conclusão da rota "${route.name}"? Todas as vendas serão marcadas como entregues.`)) {
       // Marcar todas as vendas da rota como entregues
       route.sales.forEach(sale => {
@@ -189,7 +203,7 @@ const DeliveryManager: React.FC = () => {
     }
   };
 
-  const getRouteStatusColor = (status: DeliveryRoute['status']) => {
+  const getRouteStatusColor = (status: DeliveryRouteLocal['status']) => {
     switch (status) {
       case 'Planejada': return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'Em Andamento': return 'bg-yellow-100 text-yellow-800 border-yellow-200';

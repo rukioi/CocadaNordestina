@@ -42,7 +42,7 @@ const Login: React.FC = () => {
         <div className="text-center mb-8">
           <div className="mx-auto w-20 h-20 mb-4 rounded-full overflow-hidden ring-4 ring-primary/20 shadow-lg">
             <img 
-              src="/src/assets/Cocada Imagem.jpeg" 
+              src="https://images.pexels.com/photos/87818/background-coconut-brown-fruit-87818.jpeg?auto=compress&cs=tinysrgb&w=80&h=80&dpr=1" 
               alt="Cocada Nordestina" 
               className="w-full h-full object-cover"
             />

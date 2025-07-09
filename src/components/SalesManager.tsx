@@ -33,6 +33,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
+interface FormData {
+  customerId: string;
+  customerName: string;
+  items: SaleItem[];
+  notes: string;
+  status: Sale['status'];
+}
+
+interface NewItem {
+  productId: string;
+  quantity: number;
+  customPrice: string;
+}
+
 const SalesManager: React.FC = () => {
   const [sales, setSales] = useState<Sale[]>([]);
   const [filteredSales, setFilteredSales] = useState<Sale[]>([]);
@@ -44,15 +58,15 @@ const SalesManager: React.FC = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     customerId: '',
     customerName: '',
     items: [] as SaleItem[],
     notes: '',
-    status: 'Pendente' as Sale['status']
+    status: 'Pendente'
   });
 
-  const [newItem, setNewItem] = useState({
+  const [newItem, setNewItem] = useState<NewItem>({
     productId: '',
     quantity: 1,
     customPrice: ''
@@ -219,7 +233,7 @@ const SalesManager: React.FC = () => {
     const customer = customers.find(c => c.id === formData.customerId);
     if (!customer) return;
 
-    const newSale = SalesSystem.createSale({
+    SalesSystem.createSale({
       customerId: formData.customerId,
       customerName: customer.name,
       items: formData.items,

@@ -1,5 +1,10 @@
 import { User, AuditLog } from './types';
 
+// Estender User para incluir password
+interface UserWithPassword extends User {
+  password: string;
+}
+
 const STORAGE_KEYS = {
   USERS: 'cocada_users',
   CURRENT_USER: 'cocada_current_user',
@@ -7,11 +12,11 @@ const STORAGE_KEYS = {
 };
 
 // Usuário admin inicial
-const INITIAL_ADMIN: User = {
+const INITIAL_ADMIN: UserWithPassword = {
   id: '1',
   name: 'Adriana Souza',
   email: 'adriana@cocadanordestina.com',
-  password: 'murilo05', // Em produção, seria hasheado
+  password: 'murilo05',
   role: 'Administrador',
   active: true,
   createdAt: new Date().toISOString()
@@ -26,16 +31,17 @@ export class AuthService {
   }
 
   static async login(email: string, password: string): Promise<User | null> {
-    const users: User[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
-    const user = users.find(u => u.email === email && u.password === password && u.active);
+    const users: UserWithPassword[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+    const userWithPassword = users.find(u => u.email === email && u.password === password && u.active);
     
-    if (user) {
-      user.lastLogin = new Date().toISOString();
-      this.updateUser(user);
-      localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+    if (userWithPassword) {
+      const { password: _, ...user } = userWithPassword;
+      const updatedUser = { ...user, lastLogin: new Date().toISOString() };
+      this.updateUser({ ...userWithPassword, lastLogin: new Date().toISOString() });
+      localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(updatedUser));
       
       this.addAuditLog(user.id, user.name, 'LOGIN', 'Usuário fez login no sistema');
-      return user;
+      return updatedUser;
     }
     
     return null;
@@ -58,7 +64,7 @@ export class AuthService {
     const user = this.getCurrentUser();
     if (!user) return false;
 
-    const permissions = {
+    const permissions: Record<User['role'], string[]> = {
       'Administrador': ['*'],
       'Gerente': ['sales', 'products', 'customers', 'delivery', 'reports'],
       'Vendedor': ['sales', 'customers'],
@@ -70,46 +76,53 @@ export class AuthService {
   }
 
   static getAllUsers(): User[] {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+    const usersWithPassword: UserWithPassword[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+    return usersWithPassword.map(({ password, ...user }) => user);
   }
 
-  static createUser(userData: Omit<User, 'id' | 'createdAt'>): User {
-    const users = this.getAllUsers();
-    const newUser: User = {
+  static createUser(userData: Omit<UserWithPassword, 'id' | 'createdAt'>): User {
+    const users: UserWithPassword[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+    const newUserWithPassword: UserWithPassword = {
       ...userData,
       id: Date.now().toString(),
       createdAt: new Date().toISOString()
     };
     
-    users.push(newUser);
+    users.push(newUserWithPassword);
     localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
     
     const currentUser = this.getCurrentUser();
     if (currentUser) {
-      this.addAuditLog(currentUser.id, currentUser.name, 'CREATE_USER', `Criou usuário: ${newUser.name}`);
+      this.addAuditLog(currentUser.id, currentUser.name, 'CREATE_USER', `Criou usuário: ${newUserWithPassword.name}`);
     }
     
+    const { password, ...newUser } = newUserWithPassword;
     return newUser;
   }
 
-  static updateUser(userData: User): void {
-    const users = this.getAllUsers();
+  static updateUser(userData: UserWithPassword | User): void {
+    const users: UserWithPassword[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
     const index = users.findIndex(u => u.id === userData.id);
     
     if (index !== -1) {
-      users[index] = userData;
+      if ('password' in userData) {
+        users[index] = userData as UserWithPassword;
+      } else {
+        users[index] = { ...users[index], ...userData };
+      }
       localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
       
       // Atualizar usuário atual se for o mesmo
       const currentUser = this.getCurrentUser();
       if (currentUser && currentUser.id === userData.id) {
-        localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(userData));
+        const { password, ...userWithoutPassword } = users[index];
+        localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(userWithoutPassword));
       }
     }
   }
 
   static deleteUser(userId: string): void {
-    const users = this.getAllUsers();
+    const users: UserWithPassword[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
     const filteredUsers = users.filter(u => u.id !== userId);
     localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(filteredUsers));
     

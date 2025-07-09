@@ -177,8 +177,8 @@ const Layout: React.FC = () => {
       </div>
 
       {/* Main Content - CORRIGIDO PARA FICAR AO LADO DA SIDEBAR */}
-      <div className="flex-1 lg:ml-0 pt-16 lg:pt-0">
-        <main className="h-full max-w-7xl mx-auto p-4 lg:p-6">
+      <div className="flex-1 lg:ml-0 pt-16 lg:pt-0 min-h-screen">
+        <main className="h-full max-w-7xl mx-auto p-4 lg:p-6 container-mobile">
           <Outlet />
         </main>
       </div>

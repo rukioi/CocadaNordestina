@@ -27,7 +27,34 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Pie, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Pie, Cell } from 'recharts';
+
+interface DailySale {
+  date: string;
+  value: number;
+}
+
+interface TopProduct {
+  name: string;
+  quantity: number;
+  revenue: number;
+}
+
+interface TopCustomer {
+  name: string;
+  total: number;
+  orders: number;
+}
+
+interface ReportMetrics {
+  totalRevenue: number;
+  totalSales: number;
+  totalItems: number;
+  averageTicket: number;
+  topProducts: TopProduct[];
+  dailySales: DailySale[];
+  topCustomers: TopCustomer[];
+}
 
 const ReportsManager: React.FC = () => {
   const [sales, setSales] = useState<Sale[]>([]);
@@ -159,7 +186,7 @@ const ReportsManager: React.FC = () => {
     const averageTicket = totalSales > 0 ? totalRevenue / totalSales : 0;
 
     // Top produtos
-    const productSales: { [key: string]: { name: string; quantity: number; revenue: number } } = {};
+    const productSales: Record<string, TopProduct> = {};
     filteredSales.forEach(sale => {
       sale.items.forEach(item => {
         if (!productSales[item.productId]) {
@@ -175,18 +202,18 @@ const ReportsManager: React.FC = () => {
       .slice(0, 5);
 
     // Vendas por dia
-    const salesByDay: { [key: string]: number } = {};
+    const salesByDay: Record<string, number> = {};
     filteredSales.forEach(sale => {
       const day = new Date(sale.createdAt).toISOString().split('T')[0];
       salesByDay[day] = (salesByDay[day] || 0) + sale.total;
     });
 
-    const dailySales = Object.entries(salesByDay)
+    const dailySales: DailySale[] = Object.entries(salesByDay)
       .map(([date, value]) => ({ date, value }))
       .sort((a, b) => a.date.localeCompare(b.date));
 
     // Top clientes
-    const customerSales: { [key: string]: { name: string; total: number; orders: number } } = {};
+    const customerSales: Record<string, TopCustomer> = {};
     filteredSales.forEach(sale => {
       if (!customerSales[sale.customerId]) {
         customerSales[sale.customerId] = { name: sale.customerName, total: 0, orders: 0 };
@@ -207,7 +234,7 @@ const ReportsManager: React.FC = () => {
       topProducts,
       dailySales,
       topCustomers
-    };
+    } as ReportMetrics;
   };
 
   const formatCurrency = (value: number) => {
@@ -333,7 +360,7 @@ const ReportsManager: React.FC = () => {
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="date" tickFormatter={formatDate} />
                             <YAxis tickFormatter={(value) => `R$ ${value}`} />
-                            <Tooltip 
+                            <RechartsTooltip 
                               formatter={(value) => [formatCurrency(Number(value)), 'Vendas']}
                               labelFormatter={(label) => formatDate(label)}
                             />
@@ -357,7 +384,7 @@ const ReportsManager: React.FC = () => {
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="name" />
                             <YAxis />
-                            <Tooltip formatter={(value) => [`${value} potes`, 'Vendidos']} />
+                            <RechartsTooltip formatter={(value) => [`${value} potes`, 'Vendidos']} />
                             <Bar dataKey="quantity" fill="#D2B48C" />
                           </BarChart>
                         </ResponsiveContainer>
@@ -378,16 +405,16 @@ const ReportsManager: React.FC = () => {
                               cx="50%"
                               cy="50%"
                               labelLine={false}
-                              label={({ name, revenue }) => `${name}: ${formatCurrency(revenue)}`}
+                              label={({ name, revenue }: { name: string; revenue: number }) => `${name}: ${formatCurrency(revenue)}`}
                               outerRadius={80}
                               fill="#8884d8"
                               dataKey="revenue"
                             >
-                              {metrics.topProducts.map((entry, index) => (
+                              {metrics.topProducts.map((_, index) => (
                                 <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
                               ))}
                             </Pie>
-                            <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                            <RechartsTooltip formatter={(value) => formatCurrency(Number(value))} />
                           </RechartsPieChart>
                         </ResponsiveContainer>
                       </div>
@@ -403,7 +430,7 @@ const ReportsManager: React.FC = () => {
                     <CardContent>
                       <div className="space-y-3">
                         {metrics.topCustomers.map((customer, index) => (
-                          <div key={customer.name} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                          <div key={`customer-${customer.name}-${index}`} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-semibold">
                                 {index + 1}
@@ -556,7 +583,7 @@ const ReportsManager: React.FC = () => {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" tickFormatter={formatDate} />
                   <YAxis tickFormatter={(value) => `R$ ${value}`} />
-                  <Tooltip 
+                  <RechartsTooltip 
                     formatter={(value) => [formatCurrency(Number(value)), 'Vendas']}
                     labelFormatter={(label) => formatDate(label)}
                   />
@@ -580,7 +607,7 @@ const ReportsManager: React.FC = () => {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" />
                   <YAxis type="category" dataKey="name" width={100} />
-                  <Tooltip formatter={(value) => [`${value} potes`, 'Vendidos']} />
+                  <RechartsTooltip formatter={(value) => [`${value} potes`, 'Vendidos']} />
                   <Bar dataKey="quantity" fill="#D2B48C" />
                 </BarChart>
               </ResponsiveContainer>
@@ -599,7 +626,7 @@ const ReportsManager: React.FC = () => {
           <div className="space-y-3">
             {metrics.topCustomers.length > 0 ? (
               metrics.topCustomers.map((customer, index) => (
-                <div key={customer.name} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                <div key={`top-customer-${customer.name}-${index}`} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-semibold">
                       {index + 1}

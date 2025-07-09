@@ -34,6 +34,28 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
+interface UserForm {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  role: User['role'];
+  active: boolean;
+}
+
+interface PasswordForm {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+interface SystemSettings {
+  notifications: boolean;
+  autoBackup: boolean;
+  lowStockAlert: boolean;
+  lowStockThreshold: number;
+}
+
 const SettingsManager: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
@@ -44,22 +66,22 @@ const SettingsManager: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [userForm, setUserForm] = useState({
+  const [userForm, setUserForm] = useState<UserForm>({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'Vendedor' as User['role'],
+    role: 'Vendedor',
     active: true
   });
 
-  const [passwordForm, setPasswordForm] = useState({
+  const [passwordForm, setPasswordForm] = useState<PasswordForm>({
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
 
-  const [systemSettings, setSystemSettings] = useState({
+  const [systemSettings, setSystemSettings] = useState<SystemSettings>({
     notifications: true,
     autoBackup: true,
     lowStockAlert: true,
@@ -170,7 +192,7 @@ const SettingsManager: React.FC = () => {
         alert('A senha deve ter pelo menos 6 caracteres');
         return;
       }
-      updatedUser.password = userForm.password;
+      (updatedUser as User & { password: string }).password = userForm.password;
     }
 
     AuthService.updateUser(updatedUser);
@@ -203,7 +225,7 @@ const SettingsManager: React.FC = () => {
       return;
     }
 
-    if (currentUser.password !== passwordForm.currentPassword) {
+    if ((currentUser as User & { password: string }).password !== passwordForm.currentPassword) {
       alert('Senha atual incorreta');
       return;
     }
@@ -218,7 +240,7 @@ const SettingsManager: React.FC = () => {
       return;
     }
 
-    const updatedUser = { ...currentUser, password: passwordForm.newPassword };
+    const updatedUser = { ...currentUser, password: passwordForm.newPassword } as User & { password: string };
     AuthService.updateUser(updatedUser);
     
     setIsChangePasswordModalOpen(false);
@@ -240,8 +262,13 @@ const SettingsManager: React.FC = () => {
   };
 
   const exportData = () => {
+    const exportUsers = users.map(u => {
+      const { password, ...userWithoutPassword } = u as User & { password: string };
+      return { ...userWithoutPassword, password: '***' };
+    });
+    
     const data = {
-      users: users.map(u => ({ ...u, password: '***' })), // Não exportar senhas
+      users: exportUsers,
       auditLogs: auditLogs,
       exportDate: new Date().toISOString()
     };
