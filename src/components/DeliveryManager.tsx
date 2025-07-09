@@ -50,10 +50,10 @@ const ARACAJU_NEIGHBORHOODS = {
 };
 
 const DeliveryManager: React.FC = () => {
-  const [sales] = useState<Sale[]>([]);
-  const [routes] = useState<DeliveryRoute[]>([]);
-  const [customers] = useState<Customer[]>([]);
-  const [pendingSales] = useState<Sale[]>([]);
+  const [sales, setSales] = useState<Sale[]>([]);
+  const [routes, setRoutes] = useState<DeliveryRoute[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [pendingSales, setPendingSales] = useState<Sale[]>([]);
   const [isCreateRouteModalOpen, setIsCreateRouteModalOpen] = useState(false);
   const [isViewRouteModalOpen, setIsViewRouteModalOpen] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<DeliveryRoute | null>(null);
@@ -65,8 +65,15 @@ const DeliveryManager: React.FC = () => {
   });
 
   useEffect(() => {
-    // Função removida pois não há mais sistema de entregas
+    loadDeliveryData();
   }, []);
+
+  const loadDeliveryData = () => {
+    setSales(SalesSystem.getSales());
+    setRoutes(SalesSystem.getDeliveryRoutes());
+    setCustomers(SalesSystem.getCustomers());
+    setPendingSales(SalesSystem.getSales().filter(sale => sale.status === 'Confirmada'));
+  };
 
   const getCustomerByName = (customerName: string) => {
     return customers.find(c => c.name === customerName);
@@ -154,9 +161,19 @@ const DeliveryManager: React.FC = () => {
       return;
     }
 
-    optimizeRoute(routeForm.selectedSales);
-    calculateRouteMetrics(routeForm.selectedSales);
+    const optimizedSales = optimizeRoute(routeForm.selectedSales);
+    const metrics = calculateRouteMetrics(routeForm.selectedSales);
+    
+    SalesSystem.createDeliveryRoute({
+      name: routeForm.name,
+      date: routeForm.date,
+      sales: optimizedSales,
+      status: 'Planejada',
+      totalValue: metrics.totalValue,
+      estimatedTime: metrics.estimatedTime
+    });
 
+    loadDeliveryData();
     setIsCreateRouteModalOpen(false);
     setRouteForm({
       name: '',
@@ -171,6 +188,7 @@ const DeliveryManager: React.FC = () => {
       route.sales.forEach(sale => {
         SalesSystem.confirmDelivery(sale.id);
       });
+      loadDeliveryData();
     }
   };
 
